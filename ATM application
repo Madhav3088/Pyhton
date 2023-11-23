@@ -1,0 +1,167 @@
+users = {
+    "user1": {"password": "user1", "balance": 0},
+    "user2": {"password": "user2", "balance": 0},
+    "user3": {"password": "user3", "balance": 0},
+    "user4": {"password": "user4", "balance": 0},
+    "user5": {"password": "user5", "balance": 0},
+}
+
+admin = {"password": "admin", "balance": 100000}
+
+def lock_account(account_type):
+    print(f"Account locked due to multiple failed login attempts.")
+    exit()
+
+
+def user_login():
+    attempts = 0
+    while attempts < 3:
+        username = input("Enter User ID: ")
+        password = input("Enter Password: ")
+        if username in users and users[username]["password"] == password:
+            return username
+        else:
+            print("Invalid User ID or Password. Try again.")
+            attempts += 1
+    lock_account("user")
+
+
+def admin_login():
+    attempts = 0
+    while attempts < 3:
+        password = input("Enter Password: ")
+        if admin["password"] == password:
+            return True
+        else:
+            print("Invalid Admin Password. Try again.")
+            attempts += 1
+    lock_account("admin")
+
+def cash_deposit(username):
+    max_deposit = 100000 
+    denomination = [100, 200, 500, 2000]
+    total_deposit = 0
+
+    while True:
+        amount = int(input("Enter deposit amount: "))
+        if amount <= max_deposit - total_deposit:
+            total_deposit += amount
+            for denom in denomination:
+                count = amount // denom
+                if count > 0:
+                    print(f"[{denom}*{count}] = {denom * count}")
+                amount %= denom
+            users[username]["balance"] += total_deposit
+            print(f"Total deposit = {total_deposit}")
+            break
+        else:
+            print("Exceeded maximum deposit limit. Try again.")
+
+def cash_withdraw(username):
+    max_withdraw = 50000  
+    denomination = [100, 200, 500, 2000]
+
+    while True:
+        amount = int(input("Enter withdraw amount: "))
+        if amount <= max_withdraw and amount <= users[username]["balance"]:
+            withdrawn_amount = 0  
+            for denom in denomination:
+                count = amount // denom
+                if count > 0:
+                    print(f"[{denom}*{count}] = {denom * count}")
+                    withdrawn_amount += denom * count  
+                amount %= denom
+            users[username]["balance"] -= withdrawn_amount  
+            print(f"Total withdraw = {withdrawn_amount}")
+            break
+        else:
+            print("Invalid amount or exceeded maximum withdraw limit. Try again.")
+
+
+def check_balance(username):
+    balance = users[username]["balance"]
+    print(f"Account balance: {balance}")
+
+
+def change_password(username):
+    current_password = input("Enter current password: ")
+    if current_password == users[username]["password"]:
+        new_password = input("Enter new password: ")
+        users[username]["password"] = new_password
+        print("Password changed successfully.")
+    else:
+        print("Invalid password. Password change failed.")
+
+
+def admin_total_balance():
+    total_balance = admin["balance"]
+    print(f"Admin's balance: {total_balance}")
+
+def admin_cash_deposit():
+    max_deposit = 300000  
+    denomination = [100, 200, 500, 2000]
+    total_deposit = 0
+
+    while True:
+        amount = int(input("Enter the deposit amount: "))
+        if amount <= max_deposit - total_deposit:
+            total_deposit += amount
+            for denom in denomination:
+                count = amount // denom
+                if count > 0:
+                    print(f"[{denom}*{count}] = {denom * count}")
+                amount %= denom
+            admin["balance"] += total_deposit
+            print(f"Total deposit = {total_deposit}")
+            break
+        else:
+            print("Exceeded maximum deposit limit. Try again.")
+
+
+print("Welcome to the ATM")
+account_type = input("Are you a? (user/admin): ").lower()
+
+if account_type == "user":
+    username = user_login()
+    while True:
+        print("\nUser Options:")
+        print("1. Cash Deposit")
+        print("2. Cash Withdraw")
+        print("3. Check Balance")
+        print("4. Change Password")
+        print("5. Exit")
+        option = input("Enter option (1/2/3/4/5): ")
+
+        if option == "1":
+            cash_deposit(username)
+        elif option == "2":
+            cash_withdraw(username)
+        elif option == "3":
+            check_balance(username)
+        elif option == "4":
+            change_password(username)
+        elif option == "5":
+            print("Thank you. Goodbye!")
+            break
+        else:
+            print("Invalid option. Please try again.")
+elif account_type == "admin":
+    if admin_login():
+        while True:
+            print("\nAdmin Options:")
+            print("1. Admin's Total Balance")
+            print("2. Admin Cash Deposit")
+            print("3. Exit")
+            option = input("Enter option (1/2/3): ")
+
+            if option == "1":
+                admin_total_balance()
+            elif option == "2":
+                admin_cash_deposit()
+            elif option == "3":
+                print("Thank you, Admin. Goodbye!")
+                break
+            else:
+                print("Invalid option. Please try again.")
+else:
+    print("Invalid account type. Please enter 'user' or 'admin'.")
